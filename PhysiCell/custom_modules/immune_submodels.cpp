@@ -138,7 +138,7 @@ void replace_out_of_bounds_cell( Cell* pC , double tolerance )
 	position[1] += Yrange * UniformRandom(); 
 	position[2] += Zrange * UniformRandom() + parameters.doubles("immune_z_offset"); 
 	
-	#pragma omp critical(kill_cell_on_edge)
+//rwh	#pragma omp critical(kill_cell_on_edge)
 	{
 		std::cout << "moving cell from edge " << pC << " " << pC->type_name << std::endl; 
 		// create a new cell of same type 
@@ -148,8 +148,8 @@ void replace_out_of_bounds_cell( Cell* pC , double tolerance )
 
 		// get rid of the old one 
 		// pC->remove_all_attached_cells(); 
-		pC->die(); 
-		// pC->lyse_cell(); 
+		//rwh pC->die(); 
+		pC->lyse_cell();  //rwh
 		
 		// alternate 
 		// pC->lyse_cell(); 
@@ -491,7 +491,7 @@ void macrophage_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
 		if( pTestCell != pCell && pTestCell->phenotype.death.dead == true &&  
 			UniformRandom()<macrophage_probability_of_phagocytosis )
 		{
-			#pragma omp critical(macrophage_eat)
+//rwh			#pragma omp critical(macrophage_eat)
 			{
 				// remove_all_adhesions( pTestCell ); // debug 
 				pCell->ingest_cell( pTestCell ); 
@@ -920,9 +920,9 @@ void immune_cell_recruitment( double dt )
 		microenvironment.find_density_index("pro-inflammatory cytokine");
 	
 	static double dt_immune = parameters.doubles( "immune_dt" ); 
-	static double t_immune = 0.0; 
-	static double t_last_immune = 0.0; 
-	static double t_next_immune = 0.0; 
+	double t_immune = 0.0;   //rwh remove 'static'
+	double t_last_immune = 0.0;   //rwh remove 'static'
+	double t_next_immune = 0.0;   //rwh remove 'static'
 	
 	static double tolerance = 0.1 * diffusion_dt; 
 	
@@ -1051,7 +1051,7 @@ void keep_immune_cells_off_edge( void )
 	static double Ymax = microenvironment.mesh.bounding_box[4]; 
 	static double Zmax = microenvironment.mesh.bounding_box[5]; 
 
-	static bool setup_done = false; 
+	bool setup_done = false;   //rwh remove 'static'
 	if( default_microenvironment_options.simulate_2D == true && setup_done == false )
 	{
 		Zmin = 0.0; 
@@ -1125,11 +1125,11 @@ void keep_immune_cells_off_edge( void )
 void keep_immune_cells_in_bounds( double dt )
 {
 	static double dt_bounds = 5; 
-	static double next_time = 0.0; 
+	double next_time = 0.0;  //rwh remove 'static'
 
-	static double t_bounds = 0.0; 
-	static double t_last_bounds = 0.0; 
-	static double t_next_bounds = 0.0; 
+	double t_bounds = 0.0;   //rwh remove 'static'
+	double t_last_bounds = 0.0;   //rwh remove 'static'
+	double t_next_bounds = 0.0;   //rwh remove 'static'
 	
 	static double tolerance = 0.1 * diffusion_dt; 
 	
@@ -1170,11 +1170,11 @@ void detach_all_dead_cells( void )
 void detach_all_dead_cells( double dt )
 {
 	static double dt_detach = 0.1; 
-	static double next_time = 0.0; 
+	double next_time = 0.0;  //rwh remove 'static'
 
-	static double t_detach = 0.0; 
-	static double t_last = 0.0; 
-	static double t_next = 0.0; 
+	double t_detach = 0.0;   //rwh remove 'static'
+	double t_last = 0.0;   //rwh remove 'static'
+	double t_next = 0.0;   //rwh remove 'static'
 	
 	static double tolerance = 0.1 * diffusion_dt; 
 	

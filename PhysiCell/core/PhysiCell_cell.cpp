@@ -1232,7 +1232,7 @@ void Cell::lyse_cell( void )
 	{ return; } 	
 	
 	// flag for removal 
-	#pragma omp critical(lyse_cell)
+	//rwh #pragma omp critical(lyse_cell)
 	{
 		bool volume_was_zero = false; 
 		if( phenotype.volume.total < 1e-15 )
@@ -2325,7 +2325,7 @@ void Cell::detach_cell( Cell* pRemoveMe )
 
 void Cell::remove_all_attached_cells( void )
 {
-	#pragma omp critical(remove_all_attached_cells)
+	//rwh #pragma omp critical(remove_all_attached_cells)
 	{
 		// remove self from any attached cell's list. 
 		for( int i = 0; i < state.attached_cells.size() ; i++ )
