@@ -914,15 +914,15 @@ Cell* immune_cell_check_neighbors_for_attachment( Cell* pAttacker , double dt )
 int recruited_Tcells = 0; 
 int recruited_neutrophils = 0; 
 
-void immune_cell_recruitment( double dt )
+void immune_cell_recruitment( double dt )  // rwh: just called from main
 {
 	static int proinflammatory_cytokine_index = 
 		microenvironment.find_density_index("pro-inflammatory cytokine");
 	
 	static double dt_immune = parameters.doubles( "immune_dt" ); 
-	double t_immune = 0.0;   //rwh remove 'static'
-	double t_last_immune = 0.0;   //rwh remove 'static'
-	double t_next_immune = 0.0;   //rwh remove 'static'
+	static double t_immune = 0.0;   //rwh un-remove 'static'
+	static double t_last_immune = 0.0;   //rwh un-remove 'static'
+	static double t_next_immune = 0.0;   //rwh un-remove 'static'
 	
 	static double tolerance = 0.1 * diffusion_dt; 
 	
@@ -1041,156 +1041,156 @@ void initial_immune_cell_placement( void )
 	return;
 }
 
-void keep_immune_cells_off_edge( void )
-{
-	static double Xmin = microenvironment.mesh.bounding_box[0]; 
-	static double Ymin = microenvironment.mesh.bounding_box[1]; 
-	static double Zmin = microenvironment.mesh.bounding_box[2]; 
+// void keep_immune_cells_off_edge( void )
+// {
+// 	static double Xmin = microenvironment.mesh.bounding_box[0]; 
+// 	static double Ymin = microenvironment.mesh.bounding_box[1]; 
+// 	static double Zmin = microenvironment.mesh.bounding_box[2]; 
 
-	static double Xmax = microenvironment.mesh.bounding_box[3]; 
-	static double Ymax = microenvironment.mesh.bounding_box[4]; 
-	static double Zmax = microenvironment.mesh.bounding_box[5]; 
+// 	static double Xmax = microenvironment.mesh.bounding_box[3]; 
+// 	static double Ymax = microenvironment.mesh.bounding_box[4]; 
+// 	static double Zmax = microenvironment.mesh.bounding_box[5]; 
 
-	bool setup_done = false;   //rwh remove 'static'
-	if( default_microenvironment_options.simulate_2D == true && setup_done == false )
-	{
-		Zmin = 0.0; 
-		Zmax = 0.0; 
-	}
+// 	bool setup_done = false;   //rwh remove 'static'
+// 	if( default_microenvironment_options.simulate_2D == true && setup_done == false )
+// 	{
+// 		Zmin = 0.0; 
+// 		Zmax = 0.0; 
+// 	}
 	
-	static double Xrange = (Xmax - Xmin); 
-	static double Yrange = (Ymax - Ymin); 
-	static double Zrange = (Zmax - Zmin); 
+// 	static double Xrange = (Xmax - Xmin); 
+// 	static double Yrange = (Ymax - Ymin); 
+// 	static double Zrange = (Zmax - Zmin); 
 	
-	// warning hardcoded
-	static double relative_edge_margin = 0.01; // 0.1; 
-	static double relative_interior = 1.0 - 2.0 * relative_edge_margin; 
+// 	// warning hardcoded
+// 	static double relative_edge_margin = 0.01; // 0.1; 
+// 	static double relative_interior = 1.0 - 2.0 * relative_edge_margin; 
 	
-	static double tolerance = relative_edge_margin *(Xmax - Xmin); 
+// 	static double tolerance = relative_edge_margin *(Xmax - Xmin); 
 	
-	if( setup_done == false )
-	{
-		Xmin += relative_edge_margin*Xrange; 
-		Ymin += relative_edge_margin*Yrange; 
-		Zmin += relative_edge_margin*Zrange;
+// 	if( setup_done == false )
+// 	{
+// 		Xmin += relative_edge_margin*Xrange; 
+// 		Ymin += relative_edge_margin*Yrange; 
+// 		Zmin += relative_edge_margin*Zrange;
 		
-		Xrange *= relative_interior;
-		Yrange *= relative_interior;
-		Zrange *= relative_interior;  
-		setup_done = true; 
-	}
+// 		Xrange *= relative_interior;
+// 		Yrange *= relative_interior;
+// 		Zrange *= relative_interior;  
+// 		setup_done = true; 
+// 	}
 	
-	static int epithelial_type = get_cell_definition( "lung epithelium" ).type; 
+// 	static int epithelial_type = get_cell_definition( "lung epithelium" ).type; 
 
-	for( int n=0 ; n < (*all_cells).size() ; n++ )
-	{
-		Cell* pC = (*all_cells)[n]; 
-		bool out_of_bounds = false; 
-		if( pC->position[0] < Xmin + tolerance || 
-			pC->position[0] > Xmax - tolerance ||
-			pC->position[1] < Ymin + tolerance ||
-			pC->position[1] > Ymax - tolerance )
-		{ out_of_bounds = true; }
+// 	for( int n=0 ; n < (*all_cells).size() ; n++ )
+// 	{
+// 		Cell* pC = (*all_cells)[n]; 
+// 		bool out_of_bounds = false; 
+// 		if( pC->position[0] < Xmin + tolerance || 
+// 			pC->position[0] > Xmax - tolerance ||
+// 			pC->position[1] < Ymin + tolerance ||
+// 			pC->position[1] > Ymax - tolerance )
+// 		{ out_of_bounds = true; }
 		
-		bool move_allowed = false; 
-		if( pC->type != epithelial_type && pC->phenotype.death.dead == false )
-		{ move_allowed = true; } 
+// 		bool move_allowed = false; 
+// 		if( pC->type != epithelial_type && pC->phenotype.death.dead == false )
+// 		{ move_allowed = true; } 
 
-		if( out_of_bounds && move_allowed )
-		{
-			std::vector<double> position = {0,0,0}; // 
-			position[0] = Xmin + Xrange * UniformRandom(); 
-			position[1] = Ymin + Yrange * UniformRandom(); 
-			position[2] = Zmin + Zrange * UniformRandom() + parameters.doubles("immune_z_offset"); 
+// 		if( out_of_bounds && move_allowed )
+// 		{
+// 			std::vector<double> position = {0,0,0}; // 
+// 			position[0] = Xmin + Xrange * UniformRandom(); 
+// 			position[1] = Ymin + Yrange * UniformRandom(); 
+// 			position[2] = Zmin + Zrange * UniformRandom() + parameters.doubles("immune_z_offset"); 
 
 			
-			// new: delete that cell (or flag for removal) 
-			// new: create a NEW cell of same type at random location 
-			// also copy its custom data / state 
-			Cell* pNewCell = create_cell( get_cell_definition(pC->type_name) ); 
-			pNewCell->assign_position( position ); 
-			// pNewCell->custom_data = pC->custom_data; // enable in next testing 
+// 			// new: delete that cell (or flag for removal) 
+// 			// new: create a NEW cell of same type at random location 
+// 			// also copy its custom data / state 
+// 			Cell* pNewCell = create_cell( get_cell_definition(pC->type_name) ); 
+// 			pNewCell->assign_position( position ); 
+// 			// pNewCell->custom_data = pC->custom_data; // enable in next testing 
 			
-			// new: delete that cell (or flag for removal) 
-			#pragma omp critical(kill_cell_on_edge)
-			{
-				// pC->remove_all_attached_cells(); 
-				pC->die(); 
-			}
-		}
-	}
-	return; 
-}
+// 			// new: delete that cell (or flag for removal) 
+// 			#pragma omp critical(kill_cell_on_edge)
+// 			{
+// 				// pC->remove_all_attached_cells(); 
+// 				pC->die(); 
+// 			}
+// 		}
+// 	}
+// 	return; 
+// }
 
-void keep_immune_cells_in_bounds( double dt )
-{
-	static double dt_bounds = 5; 
-	double next_time = 0.0;  //rwh remove 'static'
+// void keep_immune_cells_in_bounds( double dt )  //rwh - not used any more?
+// {
+// 	static double dt_bounds = 5; 
+// 	double next_time = 0.0;  //rwh remove 'static'
 
-	double t_bounds = 0.0;   //rwh remove 'static'
-	double t_last_bounds = 0.0;   //rwh remove 'static'
-	double t_next_bounds = 0.0;   //rwh remove 'static'
+// 	double t_bounds = 0.0;   //rwh remove 'static'
+// 	double t_last_bounds = 0.0;   //rwh remove 'static'
+// 	double t_next_bounds = 0.0;   //rwh remove 'static'
 	
-	static double tolerance = 0.1 * diffusion_dt; 
+// 	static double tolerance = 0.1 * diffusion_dt; 
 	
-	// is it time for the next immune recruitment? 
-	if( t_bounds > t_next_bounds- tolerance )
-	{
-		double elapsed_time = (t_bounds - t_last_bounds );
+// 	// is it time for the next immune recruitment? 
+// 	if( t_bounds > t_next_bounds- tolerance )
+// 	{
+// 		double elapsed_time = (t_bounds - t_last_bounds );
 		
-		keep_immune_cells_off_edge(); 
+// 		keep_immune_cells_off_edge(); 
 		
-		t_last_bounds = t_bounds; 
-		t_next_bounds = t_bounds + dt_bounds; 
-	}
-	t_bounds += dt; 
+// 		t_last_bounds = t_bounds; 
+// 		t_next_bounds = t_bounds + dt_bounds; 
+// 	}
+// 	t_bounds += dt; 
 
-	return; 
-}
+// 	return; 
+// }
 
-void detach_all_dead_cells( void )
-{
-	Cell* pC;
-	for( int n = 0 ; n < (*all_cells).size() ; n++ )
-	{
-		pC = (*all_cells)[n]; 
-		if( pC->phenotype.death.dead == true )
-		{
-			if( pC->state.neighbors.size() > 0 )
-			{
-				std::cout << "remove all attachments for " << pC << " " << pC->type_name << std::endl; 
-				pC->remove_all_attached_cells(); 
-			}
-		}	
-	}
+// void detach_all_dead_cells( void )
+// {
+// 	Cell* pC;
+// 	for( int n = 0 ; n < (*all_cells).size() ; n++ )
+// 	{
+// 		pC = (*all_cells)[n]; 
+// 		if( pC->phenotype.death.dead == true )
+// 		{
+// 			if( pC->state.neighbors.size() > 0 )
+// 			{
+// 				std::cout << "remove all attachments for " << pC << " " << pC->type_name << std::endl; 
+// 				pC->remove_all_attached_cells(); 
+// 			}
+// 		}	
+// 	}
 	
-	return; 
-}
+// 	return; 
+// }
 
-void detach_all_dead_cells( double dt )
-{
-	static double dt_detach = 0.1; 
-	double next_time = 0.0;  //rwh remove 'static'
+// void detach_all_dead_cells( double dt )
+// {
+// 	static double dt_detach = 0.1; 
+// 	double next_time = 0.0;  //rwh remove 'static'
 
-	double t_detach = 0.0;   //rwh remove 'static'
-	double t_last = 0.0;   //rwh remove 'static'
-	double t_next = 0.0;   //rwh remove 'static'
+// 	double t_detach = 0.0;   //rwh remove 'static'
+// 	double t_last = 0.0;   //rwh remove 'static'
+// 	double t_next = 0.0;   //rwh remove 'static'
 	
-	static double tolerance = 0.1 * diffusion_dt; 
+// 	static double tolerance = 0.1 * diffusion_dt; 
 	
-	// is it time for the next immune recruitment? 
-	if( dt_detach > next_time- tolerance )
-	{
-		double elapsed_time = (t_detach - t_last );
+// 	// is it time for the next immune recruitment? 
+// 	if( dt_detach > next_time- tolerance )
+// 	{
+// 		double elapsed_time = (t_detach - t_last );
 		
-		detach_all_dead_cells(); 
+// 		detach_all_dead_cells(); 
 		
-		t_last = t_detach; 
-		next_time = t_detach + dt_detach; 
-	}
-	dt_detach += dt; 
-	return; 
-}
+// 		t_last = t_detach; 
+// 		next_time = t_detach + dt_detach; 
+// 	}
+// 	dt_detach += dt; 
+// 	return; 
+// }
 
 
 
