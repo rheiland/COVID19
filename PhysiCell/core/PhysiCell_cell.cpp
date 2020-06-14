@@ -369,13 +369,13 @@ Cell::~Cell()
 	{
 		std::cout << "cell was never removed from data structure " << std::endl ; 
 		
-		system("pause");
+		//rwh system("pause");
 		bool found = false; 
 		for( int n= 0 ; n < (*all_cells).size() ; n++ )
 		{
 			std::cout << this << " vs " << (*all_cells)[n] << std::endl; 
 			if( (*all_cells)[n] == this )
-			{ found = true; temp_index = n; system("pause"); } 
+			{ found = true; temp_index = n; } //rwh system("pause"); 
 			
 		}
 		
@@ -398,7 +398,7 @@ Cell::~Cell()
 
 			
 			// deregister agent in from the agent container
-			this->get_container()->remove_agent(this);
+			// this->get_container()->remove_agent(this);  //rwh - NO!  did above already
 			
 		}
 		//die(); 
