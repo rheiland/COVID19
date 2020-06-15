@@ -76,10 +76,10 @@ void immune_submodels_setup( void );
 bool check_for_out_of_bounds( Cell* pC , double tolerance );
 std::vector<double> set_nudge_from_edge( Cell* pC , double tolerance );
 
-void keep_immune_cells_off_edge(void); 
+// void keep_immune_cells_off_edge(void); 
 void keep_immune_cells_in_bounds( double dt );
 
-void detach_all_dead_cells( void );
-void detach_all_dead_cells( double dt );
+// void detach_all_dead_cells( void );
+// void detach_all_dead_cells( double dt );
 
 #endif 

@@ -360,8 +360,11 @@ Cell::Cell()
 Cell::~Cell()
 {
 	std::cout << std::endl << "=====-----------------------------=====" << std::endl; 
-	std::cout << "\tcell destructor " << this << " " << type_name << " " << position << std::endl;
-		std::cout << "\t\tattached cells: " << this->state.attached_cells.size() << std::endl << std::endl; 
+	std::cout << "\tcell destructor " << this << " name=" << type_name << ",  pos=" << position << std::endl;
+	std::cout << "\t pos.size=" << position.size() << std::endl;
+	if (position.size() != 3) return;
+
+	std::cout << "\t\tattached cells: " << this->state.attached_cells.size() << std::endl << std::endl; 
 	
 	auto result = std::find(std::begin( *all_cells ), std::end( *all_cells ), this );
 	int temp_index = -1; 
@@ -709,6 +712,8 @@ Cell_Container * Cell::get_container()
 
 void Cell::die()
 {
+	if (this == NULL)
+		return;
 	delete_cell(this);
 	return; 
 } 
@@ -1024,38 +1029,39 @@ void delete_cell( int index )
 	// deregister agent in from the agent container
 	pDeleteMe->get_container()->remove_agent(pDeleteMe);
 	// de-allocate (delete) the cell; 
-	delete pDeleteMe; 
+	if (pDeleteMe->position.size() == 3)
+		delete pDeleteMe; 
 
 
 	return; 
 }
 
-void delete_cell_original( int index ) // before June 11, 2020
-{
-	std::cout << __FUNCTION__ << " " << (*all_cells)[index] 
-	<< " " << (*all_cells)[index]->type_name << std::endl; 
+// void delete_cell_original( int index ) // before June 11, 2020
+// {
+// 	std::cout << __FUNCTION__ << " " << (*all_cells)[index] 
+// 	<< " " << (*all_cells)[index]->type_name << std::endl; 
 	
-	// release any attached cells (as of 1.7.2 release)
-	(*all_cells)[index]->remove_all_attached_cells(); 
+// 	// release any attached cells (as of 1.7.2 release)
+// 	(*all_cells)[index]->remove_all_attached_cells(); 
 	
-	// released internalized substrates (as of 1.5.x releases)
-	(*all_cells)[index]->release_internalized_substrates(); 
+// 	// released internalized substrates (as of 1.5.x releases)
+// 	(*all_cells)[index]->release_internalized_substrates(); 
 	
-	// deregister agent in from the agent container
-	(*all_cells)[index]->get_container()->remove_agent((*all_cells)[index]);
-	// de-allocate (delete) the cell; 
-	delete (*all_cells)[index]; 
+// 	// deregister agent in from the agent container
+// 	(*all_cells)[index]->get_container()->remove_agent((*all_cells)[index]);
+// 	// de-allocate (delete) the cell; 
+// 	delete (*all_cells)[index]; 
 
-	// performance goal: don't delete in the middle -- very expensive reallocation
-	// alternative: copy last element to index position, then shrink vector by 1 at the end O(constant)
+// 	// performance goal: don't delete in the middle -- very expensive reallocation
+// 	// alternative: copy last element to index position, then shrink vector by 1 at the end O(constant)
 
-	// move last item to index location  
-	(*all_cells)[ (*all_cells).size()-1 ]->index=index;
-	(*all_cells)[index] = (*all_cells)[ (*all_cells).size()-1 ];
-	// shrink the vector
-	(*all_cells).pop_back();	
-	return; 
-}
+// 	// move last item to index location  
+// 	(*all_cells)[ (*all_cells).size()-1 ]->index=index;
+// 	(*all_cells)[index] = (*all_cells)[ (*all_cells).size()-1 ];
+// 	// shrink the vector
+// 	(*all_cells).pop_back();	
+// 	return; 
+// }
 
 
 
@@ -1063,6 +1069,7 @@ void delete_cell_original( int index ) // before June 11, 2020
 void delete_cell( Cell* pDelete )
 {
 	delete_cell(pDelete->index);
+	pDelete = NULL;
 	return; 
 }
 

@@ -322,7 +322,9 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 		for( int i=0; i < (*all_cells).size(); i++ )
 		{
 
-			if(!(*all_cells)[i]->is_out_of_domain && (*all_cells)[i]->is_movable && (*all_cells)[i]->functions.update_velocity )
+			// if(!(*all_cells)[i]->is_out_of_domain && (*all_cells)[i]->is_movable && (*all_cells)[i]->functions.update_velocity )
+			//rwh - check for valid cell pointer (temporarily)
+			if( (*all_cells)[i] && !(*all_cells)[i]->is_out_of_domain && (*all_cells)[i]->is_movable && (*all_cells)[i]->functions.update_velocity )
 			{
 				// update_velocity already includes the motility update 
 				//(*all_cells)[i]->phenotype.motility.update_motility_vector( (*all_cells)[i] ,(*all_cells)[i]->phenotype , time_since_last_mechanics ); 
