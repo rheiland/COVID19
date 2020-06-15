@@ -842,8 +842,9 @@ void Cell::copy_function_pointers(Cell* copy_me)
 
 void Cell::add_potentials(Cell* other_agent)
 {
-	// if( this->ID == other_agent->ID )
-	if(other_agent && this->ID == other_agent->ID )  //rwh: check for non-null ptr
+	if(!other_agent )  //rwh: check for non-null ptr
+	{ return; }
+	if( this->ID == other_agent->ID )
 	{ return; }
 
 	// 12 uniform neighbors at a close packing distance, after dividing out all constants
