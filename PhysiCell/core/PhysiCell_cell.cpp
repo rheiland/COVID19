@@ -712,7 +712,8 @@ Cell_Container * Cell::get_container()
 
 void Cell::die()
 {
-	if (this == NULL)
+	// if (this == NULL)  
+	if (!this)  //rwh
 		return;
 	delete_cell(this);
 	return; 
@@ -841,7 +842,8 @@ void Cell::copy_function_pointers(Cell* copy_me)
 
 void Cell::add_potentials(Cell* other_agent)
 {
-	if( this->ID == other_agent->ID )
+	// if( this->ID == other_agent->ID )
+	if(other_agent && this->ID == other_agent->ID )  //rwh: check for non-null ptr
 	{ return; }
 
 	// 12 uniform neighbors at a close packing distance, after dividing out all constants
@@ -1069,7 +1071,8 @@ void delete_cell( int index )
 void delete_cell( Cell* pDelete )
 {
 	delete_cell(pDelete->index);
-	pDelete = NULL;
+	// pDelete = NULL;
+	pDelete = 0;  //rwh
 	return; 
 }
 
