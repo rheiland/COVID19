@@ -1076,7 +1076,7 @@ void delete_cell( Cell* pDelete )
 {
 	delete_cell(pDelete->index);
 	// pDelete = NULL;
-	pDelete = 0;  //rwh
+	// pDelete = 0;  //rwh
 	return; 
 }
 
