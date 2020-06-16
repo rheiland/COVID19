@@ -238,6 +238,7 @@ void delete_basic_agent( int index )
 	// de-allocate (delete) the Basic_Agent; 
 	
 	delete all_basic_agents[index]; 
+	all_basic_agents[index] = 0;   //rwh hack
 
 	// next goal: remove this memory address. 
 

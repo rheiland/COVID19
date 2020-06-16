@@ -1032,7 +1032,7 @@ void delete_cell( int index )
 	// deregister agent in from the agent container
 	pDeleteMe->get_container()->remove_agent(pDeleteMe);
 	// de-allocate (delete) the cell; 
-	if (pDeleteMe->position.size() == 3)
+	if (pDeleteMe->position.size() == 3)  //rwh
 	{
 		delete pDeleteMe; 
 		pDeleteMe = 0;  //rwh

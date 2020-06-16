@@ -319,7 +319,8 @@ void create_infiltrating_immune_cell( std::string cell_name )
 
 void create_infiltrating_neutrophil(void)
 {
-	static Cell_Definition* pCD = find_cell_definition( "neutrophil" );
+//rwh	static Cell_Definition* pCD = find_cell_definition( "neutrophil" );
+	Cell_Definition* pCD = find_cell_definition( "neutrophil" );
 	create_infiltrating_immune_cell( pCD ); 
 	
 	return;
@@ -327,7 +328,8 @@ void create_infiltrating_neutrophil(void)
 
 void create_infiltrating_Tcell(void)
 {
-	static Cell_Definition* pCD = find_cell_definition( "CD8 Tcell" );
+//rwh static Cell_Definition* pCD = find_cell_definition( "CD8 Tcell" );
+	Cell_Definition* pCD = find_cell_definition( "CD8 Tcell" );
 	create_infiltrating_immune_cell( pCD ); 
 	
 	return;
@@ -446,7 +448,8 @@ void CD8_Tcell_mechanics( Cell* pCell, Phenotype& phenotype, double dt )
 void macrophage_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	static int apoptosis_index = phenotype.death.find_death_model_index( "Apoptosis" ); 
-	static Cell_Definition* pCD = find_cell_definition( "macrophage" ); 
+//rwh	static Cell_Definition* pCD = find_cell_definition( "macrophage" ); 
+	Cell_Definition* pCD = find_cell_definition( "macrophage" ); 
 	static int proinflammatory_cytokine_index = microenvironment.find_density_index( "pro-inflammatory cytokine");
 	static int chemokine_index = microenvironment.find_density_index( "chemokine");
 	static int debris_index = microenvironment.find_density_index( "debris");
@@ -491,7 +494,7 @@ void macrophage_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
 		if( pTestCell != pCell && pTestCell->phenotype.death.dead == true &&  
 			UniformRandom()<macrophage_probability_of_phagocytosis )
 		{
-//rwh			#pragma omp critical(macrophage_eat)
+			#pragma omp critical(macrophage_eat)  //rwh ??
 			{
 				// remove_all_adhesions( pTestCell ); // debug 
 				pCell->ingest_cell( pTestCell ); 
@@ -541,7 +544,8 @@ void neutrophil_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	//	std::cout << __FUNCTION__ << " " << __LINE__ << std::endl; 
 	static int apoptosis_index = phenotype.death.find_death_model_index( "apoptosis" ); 
-	static Cell_Definition* pCD = find_cell_definition( "neutrophil" ); 
+//rwh	static Cell_Definition* pCD = find_cell_definition( "neutrophil" ); 
+	Cell_Definition* pCD = find_cell_definition( "neutrophil" ); 
 	static int proinflammatory_cytokine_index = microenvironment.find_density_index( "pro-inflammatory cytokine");
 	static int debris_index = microenvironment.find_density_index( "debris" ); 
 	static int chemokine_index = microenvironment.find_density_index( "chemokine");
