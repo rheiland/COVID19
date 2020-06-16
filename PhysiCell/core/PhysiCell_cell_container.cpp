@@ -430,17 +430,37 @@ int find_escaping_face_index(Cell* agent)
 	return -1; 
 }
 
+// void Cell_Container::flag_cell_for_division( Cell* pCell )
+// { 
+// 	#pragma omp critical 
+// 	{cells_ready_to_divide.push_back( pCell );} 
+// 	return; 
+// }
 void Cell_Container::flag_cell_for_division( Cell* pCell )
 { 
-	#pragma omp critical 
-	{cells_ready_to_divide.push_back( pCell );} 
+	#pragma omp critical(flag_cell_for_division)
+	{
+		auto result = std::find(std::begin(cells_ready_to_divide), std::end(cells_ready_to_divide), pCell );
+		if( result == std::end(cells_ready_to_divide) )
+		{ cells_ready_to_divide.push_back( pCell ); }
+	} 
 	return; 
 }
 
-void Cell_Container::flag_cell_for_removal( Cell* pCell )
+// void Cell_Container::flag_cell_for_removal( Cell* pCell )
+// { 
+// 	#pragma omp critical 
+// 	{cells_ready_to_die.push_back( pCell );} 
+// 	return; 
+// }
+void Cell_Container::flag_cell_for_removal( Cell* pCell )   // Paul fix 6/16/20
 { 
-	#pragma omp critical 
-	{cells_ready_to_die.push_back( pCell );} 
+	#pragma omp critical(flag_cell_for_removal) 
+	{
+		auto result = std::find(std::begin(cells_ready_to_die), std::end(cells_ready_to_die), pCell );
+		if( result == std::end(cells_ready_to_die) )
+		{ cells_ready_to_die.push_back( pCell ); }		
+	} 
 	return; 
 }
 
