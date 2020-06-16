@@ -494,7 +494,7 @@ void macrophage_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
 		if( pTestCell != pCell && pTestCell->phenotype.death.dead == true &&  
 			UniformRandom()<macrophage_probability_of_phagocytosis )
 		{
-			#pragma omp critical(macrophage_eat)  //rwh ??
+			// #pragma omp critical(macrophage_eat)  //rwh ??
 			{
 				// remove_all_adhesions( pTestCell ); // debug 
 				pCell->ingest_cell( pTestCell ); 
