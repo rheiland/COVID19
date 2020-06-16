@@ -1033,7 +1033,10 @@ void delete_cell( int index )
 	pDeleteMe->get_container()->remove_agent(pDeleteMe);
 	// de-allocate (delete) the cell; 
 	if (pDeleteMe->position.size() == 3)
+	{
 		delete pDeleteMe; 
+		pDeleteMe = 0;  //rwh
+	}
 
 
 	return; 
