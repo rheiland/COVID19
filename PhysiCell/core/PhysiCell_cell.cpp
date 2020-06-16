@@ -361,10 +361,10 @@ Cell::~Cell()
 {
 	std::cout << std::endl << "=====-----------------------------=====" << std::endl; 
 	std::cout << "\tcell destructor " << this << " name=" << type_name << ",  pos=" << position << std::endl;
-	std::cout << "\t pos.size=" << position.size() << std::endl;
-	if (position.size() != 3) return;
+	// std::cout << "\t pos.size=" << position.size() << std::endl;
+	// if (position.size() != 3) return;
 
-	std::cout << "\t\tattached cells: " << this->state.attached_cells.size() << std::endl << std::endl; 
+	// std::cout << "\t\tattached cells: " << this->state.attached_cells.size() << std::endl << std::endl;  //rwh - always =0 ??
 	
 	auto result = std::find(std::begin( *all_cells ), std::end( *all_cells ), this );
 	int temp_index = -1; 
@@ -2339,7 +2339,7 @@ void Cell::detach_cell( Cell* pRemoveMe )
 
 void Cell::remove_all_attached_cells( void )
 {
-	//rwh #pragma omp critical(remove_all_attached_cells)
+	#pragma omp critical(remove_all_attached_cells)  //rwh - necessary? race?
 	{
 		// remove self from any attached cell's list. 
 		for( int i = 0; i < state.attached_cells.size() ; i++ )
