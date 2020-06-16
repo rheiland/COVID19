@@ -842,7 +842,7 @@ void Cell::copy_function_pointers(Cell* copy_me)
 
 void Cell::add_potentials(Cell* other_agent)
 {
-	if(!other_agent || !this)  //rwh: check for non-null ptr
+	if(!other_agent || !this)  //rwh: check for null ptrs
 	{ return; }
 	if( this->ID == other_agent->ID )
 	{ return; }
