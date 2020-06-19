@@ -281,7 +281,7 @@ std::vector<std::string> epithelium_coloring_function( Cell* pCell )
 	// static int color_index = cell_defaults.custom_data.find_variable_index( "assembled virion" ); 
 	static int color_index = 
 		cell_defaults.custom_data.find_variable_index( parameters.strings["color_variable"].value ); 
-	static int nV = cell_defaults.custom_data.find_variable_index( "virion" ); 
+	static int nV = cell_defaults.custom_data.find_variable_index( "virion" ); //rwh - why??
 	
 	// color by assembled virion 
 	
@@ -597,6 +597,8 @@ void SVG_plot_virus( std::string filename , Microenvironment& M, double z_slice 
 			Colors = cell_coloring_function( pC ); 
 
 			os << "   <g id=\"cell" << pC->ID << "\">" << std::endl; 
+			// if (PhysiCell_globals.current_time > 3446.9)  // rwh: 2d,9h=3420 mins, last reproducibile 
+				// std::cout << PhysiCell_globals.current_time << " " << 
   
 			// figure out how much of the cell intersects with z = 0 
    

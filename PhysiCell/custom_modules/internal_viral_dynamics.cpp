@@ -7,7 +7,7 @@ std::string internal_virus_replication_version = "0.2.0";
 Submodel_Information internal_viral_dynamics_info; 
 
 
-void internal_virus_model_setup( void )
+void internal_virus_model_setup( void )  //rwh: called from epi*submodel.cpp
 {
 		// set version
 	internal_viral_dynamics_info.name = "internal viral replication dynamics"; 
@@ -37,7 +37,7 @@ void internal_virus_model_setup( void )
 	return; 
 }
 
-void internal_virus_model( Cell* pCell, Phenotype& phenotype, double dt )
+void internal_virus_model( Cell* pCell, Phenotype& phenotype, double dt )  //rwh - it becomes a callback fn:  internal_viral_dynamics_info.phenotype_function
 {
 	// bookkeeping -- find microenvironment variables we need
 

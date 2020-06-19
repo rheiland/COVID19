@@ -142,13 +142,14 @@ void TCell_induced_apoptosis( Cell* pCell, Phenotype& phenotype, double dt )
 	
 	if( pCell->custom_data["TCell_contact_time"] > pCell->custom_data["TCell_contact_death_threshold"] )
 	{
-		// make sure to get rid of all adhesions! 
+		// make sure to get rid of all adhesions!   //rwh - no longer need to??
 		// detach all attached cells 
 		// remove_all_adhesions( pCell ); 
 		
 		#pragma omp critical(tcell)
 		{
 		std::cout << "\t\t\t\t" << pCell << " is dead of a T cell at " << pCell->position << std::endl; 
+		std::cout << "\t\t\t\t ID = " << pCell->ID << std::endl;   //rwh
 		}
 		
 		// induce death 

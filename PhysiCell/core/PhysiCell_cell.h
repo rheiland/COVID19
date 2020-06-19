@@ -149,6 +149,7 @@ class Cell_State
 	int number_of_attached_cells( void ); 
 	
 	Cell_State(); 
+	~Cell_State();   //rwh
 };
 
 class Cell : public Basic_Agent 
@@ -186,7 +187,7 @@ class Cell : public Basic_Agent
 	void lyse_cell( void ); 
 
 	Cell* divide( void );
-	void die( void );
+	void die( void ); 
 	void step(double dt);
 	Cell();
 	

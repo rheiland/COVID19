@@ -90,141 +90,58 @@ std::vector<double> set_nudge_from_edge( Cell* pC , double tolerance )
 	{ nudge[1] -= 1;  }
 
 	if( two_dimensions )
-	{ return nudge; }
+	{ normalize(nudge); return nudge; }
 
 	if( pC->position[2] < Zmin + tolerance )
 	{ nudge[2] += 1; }
 	if( pC->position[2] > Zmax - tolerance )
 	{ nudge[2] -= 1; }
 
+	normalize(nudge);
 	return nudge;
 }
 
-void replace_out_of_bounds_cell( Cell* pC , double tolerance )
+void nudge_out_of_bounds_cell( Cell* pC , double tolerance )
 {
-	static double Xmin = microenvironment.mesh.bounding_box[0]; 
-	static double Ymin = microenvironment.mesh.bounding_box[1]; 
-	static double Zmin = microenvironment.mesh.bounding_box[2]; 
-
-	static double Xmax = microenvironment.mesh.bounding_box[3]; 
-	static double Ymax = microenvironment.mesh.bounding_box[4]; 
-	static double Zmax = microenvironment.mesh.bounding_box[5]; 
+	std::vector<double> nudge = set_nudge_from_edge(pC,tolerance); 
 	
-	static bool setup_done = false; 
-	if( setup_done == false )
+	// remove attachments 
+	pC->remove_all_attached_cells(); 
+	
+	// set velocity away rom edge 
+	pC->velocity = nudge; 
+
+	// set new position 
+	nudge *= tolerance; 
+	pC->position += nudge;
+
+	// update in the data structure 
+	#pragma omp critical   //rwh
 	{
-		Xmin += tolerance; 
-		Ymin += tolerance; 
-		Zmin += tolerance; 
-		
-		Xmax -= tolerance; 
-		Ymax -= tolerance; 
-		Zmax -= tolerance; 
-		
-		if( default_microenvironment_options.simulate_2D == true )
-		{
-			Zmin = 0.0; 
-			Zmax = 0.0; 
-		}
-		setup_done = true; 
+	pC->update_voxel_in_container();
 	}
 
-	static double Xrange = Xmax - Xmin; 
-	static double Yrange = Ymax - Ymin; 
-	static double Zrange = Zmax - Zmin; 
+	// allow that cell to move and be movable 
+	pC->is_out_of_domain = false; 
+	pC->is_active = true; 
+	pC->is_movable= true; 
 	
-	std::vector<double> position = {Xmin,Ymin,Zmin}; // 
-	position[0] += Xrange * UniformRandom(); 
-	position[1] += Yrange * UniformRandom(); 
-	position[2] += Zrange * UniformRandom() + parameters.doubles("immune_z_offset"); 
-	
-	#pragma omp critical(kill_cell_on_edge)
-	{
-		std::cout << "moving cell from edge " << pC << " " << pC->type_name << std::endl; 
-		// create a new cell of same type 
-		Cell* pNewCell = create_cell( get_cell_definition(pC->type_name) ); 
-		pNewCell->assign_position( position ); 
-		// pNewCell->custom_data = pC->custom_data; // enable in next testing 
-
-		// get rid of the old one 
-		// pC->remove_all_attached_cells(); 
-		pC->die(); 
-		// pC->lyse_cell(); 
-		
-		// alternate 
-		// pC->lyse_cell(); 
-		
-	}	
 	return; 
 }
 
-void process_tagged_cells_on_edge( void )
+void process_tagged_cells_on_edge( void )   //rwh - called from main
 {
 	
 	for( int n=0 ; n < cells_to_move_from_edge.size(); n++ )
 	{
-		replace_out_of_bounds_cell( cells_to_move_from_edge[n] , 10.0 );
+		Cell* pC = cells_to_move_from_edge[n]; 
+		// std::cout << "moving cell from edge " << pC << " " << pC->type_name << std::endl; 
+		// replace_out_of_bounds_cell( cells_to_move_from_edge[n] , 10.0 );
+		nudge_out_of_bounds_cell( pC , 10.0 ); 
 	}	
+//	if( cells_to_move_from_edge.size() > 0 ) 
+//	{ std::cout << std::endl; } 
 
-	return; 
-}
-
-
-void move_out_of_bounds_cell( Cell* pC , double tolerance )
-{
-	static double Xmin = microenvironment.mesh.bounding_box[0]; 
-	static double Ymin = microenvironment.mesh.bounding_box[1]; 
-	static double Zmin = microenvironment.mesh.bounding_box[2]; 
-
-	static double Xmax = microenvironment.mesh.bounding_box[3]; 
-	static double Ymax = microenvironment.mesh.bounding_box[4]; 
-	static double Zmax = microenvironment.mesh.bounding_box[5]; 
-	
-	static bool setup_done = false; 
-	if( setup_done == false )
-	{
-		Xmin += tolerance; 
-		Ymin += tolerance; 
-		Zmin += tolerance; 
-		
-		Xmax -= tolerance; 
-		Ymax -= tolerance; 
-		Zmax -= tolerance; 
-		
-		if( default_microenvironment_options.simulate_2D == true )
-		{
-			Zmin = 0.0; 
-			Zmax = 0.0; 
-		}
-		setup_done = true; 
-	}
-
-	static double Xrange = Xmax - Xmin; 
-	static double Yrange = Ymax - Ymin; 
-	static double Zrange = Zmax - Zmin; 
-	
-	std::vector<double> position = {Xmin,Ymin,Zmin}; // 
-	position[0] += Xrange * UniformRandom(); 
-	position[1] += Yrange * UniformRandom(); 
-	position[2] += Zrange * UniformRandom() + parameters.doubles("immune_z_offset"); 
-
-	#pragma omp critical(move_cell_on_edge)
-	{
-		// create a new cell of same type 
-		Cell* pNewCell = create_cell( get_cell_definition(pC->type_name) ); 
-		pNewCell->assign_position( position ); 
-		// pNewCell->custom_data = pC->custom_data; // enable in next testing 
-
-		// get rid of the old one 
-		// pC->remove_all_attached_cells(); 
-		pC->die(); 
-		
-		/* alternate 
-		pC->lyse_cell(); 
-		pC->set_total_volume( 0.0 ); 
-		*/
-		
-	}	
 	return; 
 }
 
@@ -319,7 +236,8 @@ void create_infiltrating_immune_cell( std::string cell_name )
 
 void create_infiltrating_neutrophil(void)
 {
-	static Cell_Definition* pCD = find_cell_definition( "neutrophil" );
+	// static Cell_Definition* pCD = find_cell_definition( "neutrophil" );  //rwh remove static
+	Cell_Definition* pCD = find_cell_definition( "neutrophil" );
 	create_infiltrating_immune_cell( pCD ); 
 	
 	return;
@@ -327,7 +245,8 @@ void create_infiltrating_neutrophil(void)
 
 void create_infiltrating_Tcell(void)
 {
-	static Cell_Definition* pCD = find_cell_definition( "CD8 Tcell" );
+	// static Cell_Definition* pCD = find_cell_definition( "CD8 Tcell" );  //rwh remove static
+	Cell_Definition* pCD = find_cell_definition( "CD8 Tcell" );
 	create_infiltrating_immune_cell( pCD ); 
 	
 	return;
@@ -359,7 +278,7 @@ void CD8_Tcell_mechanics( Cell* pCell, Phenotype& phenotype, double dt )
 	// bounds check 
 	if( check_for_out_of_bounds( pCell , 10.0 ) )
 	{ 
-		#pragma omp critical 
+		#pragma omp critical(T_cell_mechanics) 
 		{ cells_to_move_from_edge.push_back( pCell ); }
 		// replace_out_of_bounds_cell( pCell, 10.0 );
 		// return; 
@@ -446,7 +365,8 @@ void CD8_Tcell_mechanics( Cell* pCell, Phenotype& phenotype, double dt )
 void macrophage_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	static int apoptosis_index = phenotype.death.find_death_model_index( "Apoptosis" ); 
-	static Cell_Definition* pCD = find_cell_definition( "macrophage" ); 
+	// static Cell_Definition* pCD = find_cell_definition( "macrophage" );   //rwh
+	Cell_Definition* pCD = find_cell_definition( "macrophage" ); 
 	static int proinflammatory_cytokine_index = microenvironment.find_density_index( "pro-inflammatory cytokine");
 	static int chemokine_index = microenvironment.find_density_index( "chemokine");
 	static int debris_index = microenvironment.find_density_index( "debris");
@@ -541,7 +461,8 @@ void neutrophil_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	//	std::cout << __FUNCTION__ << " " << __LINE__ << std::endl; 
 	static int apoptosis_index = phenotype.death.find_death_model_index( "apoptosis" ); 
-	static Cell_Definition* pCD = find_cell_definition( "neutrophil" ); 
+	// static Cell_Definition* pCD = find_cell_definition( "neutrophil" );   //rwh
+	Cell_Definition* pCD = find_cell_definition( "neutrophil" ); 
 	static int proinflammatory_cytokine_index = microenvironment.find_density_index( "pro-inflammatory cytokine");
 	static int debris_index = microenvironment.find_density_index( "debris" ); 
 	static int chemokine_index = microenvironment.find_density_index( "chemokine");
@@ -778,85 +699,6 @@ void extra_elastic_attachment_mechanics( Cell* pCell, Phenotype& phenotype, doub
 	return; 
 }	
 
-/*
-void attach_cells( Cell* pCell_1, Cell* pCell_2 )
-{
-	#pragma omp critical(attach)
-	{
-		bool already_attached = false; 
-		for( int i=0 ; i < pCell_1->state.neighbors.size() ; i++ )
-		{
-			if( pCell_1->state.neighbors[i] == pCell_2 )
-			{ already_attached = true; }
-		}
-		if( already_attached == false )
-		{ pCell_1->state.neighbors.push_back( pCell_2 ); }
-		
-		already_attached = false; 
-		for( int i=0 ; i < pCell_2->state.neighbors.size() ; i++ )
-		{
-			if( pCell_2->state.neighbors[i] == pCell_1 )
-			{ already_attached = true; }
-		}
-		if( already_attached == false )
-		{ pCell_2->state.neighbors.push_back( pCell_1 ); }
-	}
-
-	return; 
-}
-
-void detach_cells( Cell* pCell_1 , Cell* pCell_2 )
-{
-	#pragma omp critical(detach)
-	{
-		bool found = false; 
-		int i = 0; 
-		while( !found && i < pCell_1->state.neighbors.size() )
-		{
-			// if cell 2 is in cell 1's list, remove it
-			if( pCell_1->state.neighbors[i] == pCell_2 )
-			{
-				int n = pCell_1->state.neighbors.size(); 
-				// copy last entry to current position 
-				pCell_1->state.neighbors[i] = pCell_1->state.neighbors[n-1]; 
-				// shrink by one 
-				pCell_1->state.neighbors.pop_back(); 
-				found = true; 
-			}
-			i++; 
-		}
-	
-		found = false; 
-		i = 0; 
-		while( !found && i < pCell_2->state.neighbors.size() )
-		{
-			// if cell 1 is in cell 2's list, remove it
-			if( pCell_2->state.neighbors[i] == pCell_1 )
-			{
-				int n = pCell_2->state.neighbors.size(); 
-				// copy last entry to current position 
-				pCell_2->state.neighbors[i] = pCell_2->state.neighbors[n-1]; 
-				// shrink by one 
-				pCell_2->state.neighbors.pop_back(); 
-				found = true; 
-			}
-			i++; 
-		}
-	}
-	
-	return; 
-}
-
-void remove_all_adhesions( Cell* pCell )
-{
-	// detach all attached cells 
-	for( int n = 0; n < pCell->state.neighbors.size() ; n++ )
-	{ detach_cells( pCell, pCell->state.neighbors[n] ); }	
-	
-	return; 
-}
-*/
-
 bool attempt_immune_cell_attachment( Cell* pAttacker, Cell* pTarget , double dt )
 {
 	// if the target is not infected, give up 
@@ -1041,113 +883,6 @@ void initial_immune_cell_placement( void )
 	return;
 }
 
-void keep_immune_cells_off_edge( void )
-{
-	static double Xmin = microenvironment.mesh.bounding_box[0]; 
-	static double Ymin = microenvironment.mesh.bounding_box[1]; 
-	static double Zmin = microenvironment.mesh.bounding_box[2]; 
-
-	static double Xmax = microenvironment.mesh.bounding_box[3]; 
-	static double Ymax = microenvironment.mesh.bounding_box[4]; 
-	static double Zmax = microenvironment.mesh.bounding_box[5]; 
-
-	static bool setup_done = false; 
-	if( default_microenvironment_options.simulate_2D == true && setup_done == false )
-	{
-		Zmin = 0.0; 
-		Zmax = 0.0; 
-	}
-	
-	static double Xrange = (Xmax - Xmin); 
-	static double Yrange = (Ymax - Ymin); 
-	static double Zrange = (Zmax - Zmin); 
-	
-	// warning hardcoded
-	static double relative_edge_margin = 0.01; // 0.1; 
-	static double relative_interior = 1.0 - 2.0 * relative_edge_margin; 
-	
-	static double tolerance = relative_edge_margin *(Xmax - Xmin); 
-	
-	if( setup_done == false )
-	{
-		Xmin += relative_edge_margin*Xrange; 
-		Ymin += relative_edge_margin*Yrange; 
-		Zmin += relative_edge_margin*Zrange;
-		
-		Xrange *= relative_interior;
-		Yrange *= relative_interior;
-		Zrange *= relative_interior;  
-		setup_done = true; 
-	}
-	
-	static int epithelial_type = get_cell_definition( "lung epithelium" ).type; 
-
-	for( int n=0 ; n < (*all_cells).size() ; n++ )
-	{
-		Cell* pC = (*all_cells)[n]; 
-		bool out_of_bounds = false; 
-		if( pC->position[0] < Xmin + tolerance || 
-			pC->position[0] > Xmax - tolerance ||
-			pC->position[1] < Ymin + tolerance ||
-			pC->position[1] > Ymax - tolerance )
-		{ out_of_bounds = true; }
-		
-		bool move_allowed = false; 
-		if( pC->type != epithelial_type && pC->phenotype.death.dead == false )
-		{ move_allowed = true; } 
-
-		if( out_of_bounds && move_allowed )
-		{
-			std::vector<double> position = {0,0,0}; // 
-			position[0] = Xmin + Xrange * UniformRandom(); 
-			position[1] = Ymin + Yrange * UniformRandom(); 
-			position[2] = Zmin + Zrange * UniformRandom() + parameters.doubles("immune_z_offset"); 
-
-			
-			// new: delete that cell (or flag for removal) 
-			// new: create a NEW cell of same type at random location 
-			// also copy its custom data / state 
-			Cell* pNewCell = create_cell( get_cell_definition(pC->type_name) ); 
-			pNewCell->assign_position( position ); 
-			// pNewCell->custom_data = pC->custom_data; // enable in next testing 
-			
-			// new: delete that cell (or flag for removal) 
-			#pragma omp critical(kill_cell_on_edge)
-			{
-				// pC->remove_all_attached_cells(); 
-				pC->die(); 
-			}
-		}
-	}
-	return; 
-}
-
-void keep_immune_cells_in_bounds( double dt )
-{
-	static double dt_bounds = 5; 
-	static double next_time = 0.0; 
-
-	static double t_bounds = 0.0; 
-	static double t_last_bounds = 0.0; 
-	static double t_next_bounds = 0.0; 
-	
-	static double tolerance = 0.1 * diffusion_dt; 
-	
-	// is it time for the next immune recruitment? 
-	if( t_bounds > t_next_bounds- tolerance )
-	{
-		double elapsed_time = (t_bounds - t_last_bounds );
-		
-		keep_immune_cells_off_edge(); 
-		
-		t_last_bounds = t_bounds; 
-		t_next_bounds = t_bounds + dt_bounds; 
-	}
-	t_bounds += dt; 
-
-	return; 
-}
-
 void detach_all_dead_cells( void )
 {
 	Cell* pC;
@@ -1191,6 +926,3 @@ void detach_all_dead_cells( double dt )
 	dt_detach += dt; 
 	return; 
 }
-
-
-
